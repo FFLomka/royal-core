@@ -35,9 +35,11 @@ export default class Core {
 	/**
 	 * @private
 	 */
-	async _initConnector() {
+	_initConnector() {
 		try {
-			this._connector?.getData().then((rules) => {
+			if (!this._connector) return
+			if (this._connector.constructor.name != "SyncConnector") {
+				const rules = this._connector?.getData()
 				rules.map((rule) => {
 					try {
 						if (rule.type == "role") {
@@ -49,7 +51,21 @@ export default class Core {
 						}
 					} catch (error) {}
 				})
-			})
+			} else {
+				this._connector?.getData().then((rules) => {
+					rules.map((rule) => {
+						try {
+							if (rule.type == "role") {
+								const {id, name, rules, roles, upRole} = rule.payload
+								this._createRole(id, name, rules, roles, upRole, false)
+							} else if (rule.type == "user") {
+								const {id, rules, roles, upRole} = rule.payload
+								this._createUser(id, roles, rules, upRole, false)
+							}
+						} catch (error) {}
+					})
+				})
+			}
 		} catch (error) {}
 	}
 
