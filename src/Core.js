@@ -38,7 +38,7 @@ export default class Core {
 	_initConnector() {
 		try {
 			if (!this._connector) return
-			if (this._connector.constructor.name != "SyncConnector") {
+			if (this._connector.constructor.name == "SyncConnector") {
 				const rules = this._connector?.getData()
 				rules.map((rule) => {
 					try {
