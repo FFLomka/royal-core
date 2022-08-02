@@ -1,25 +1,92 @@
 import("./typedef.js")
 
 export default class Core {
-	constructor() {
+	constructor(connector, root = "Owner") {
 		/**
 		 * @private
 		 */
-		this._roles = [
-			{
-				id: "_root",
-				name: "Owner",
-				rules: [
+		this._roles = root
+			? [
 					{
-						_v0: "*",
+						id: "_root",
+						name: root,
+						rules: [
+							{
+								_v0: "*",
+							},
+						],
 					},
-				],
-			},
-		]
+			  ]
+			: []
 		/**
 		 * @private
 		 */
 		this._users = []
+
+		/**
+		 * @private
+		 */
+		if (connector) {
+			this._connector = connector
+			this._initConnector()
+		}
+	}
+
+	/**
+	 * @private
+	 */
+	async _initConnector() {
+		try {
+			this._connector?.getData().then((rules) => {
+				rules.map((rule) => {
+					try {
+						if (rule.type == "role") {
+							const {id, name, rules, roles, upRole} = rule.payload
+							this._createRole(id, name, rules, roles, upRole, false)
+						} else if (rule.type == "user") {
+							const {id, rules, roles, upRole} = rule.payload
+							this._createUser(id, roles, rules, upRole, false)
+						}
+					} catch (error) {}
+				})
+			})
+		} catch (error) {}
+	}
+
+	/**
+	 * @private
+	 */
+	async _addRoleConnector(role) {
+		try {
+			this._connector?.addRole(role)
+		} catch (error) {}
+	}
+
+	/**
+	 * @private
+	 */
+	async _addUserConnector(user) {
+		try {
+			this._connector?.addUser(user)
+		} catch (error) {}
+	}
+
+	/**
+	 * @private
+	 */
+	async _removeRoleConnector(idRole) {
+		try {
+			this._connector?.removeRole(idRole)
+		} catch (error) {}
+	}
+
+	/**
+	 * @private
+	 */
+	async _removeUserConnector(idUser) {
+		try {
+			this._connector?.removeUser(idUser)
+		} catch (error) {}
 	}
 
 	/**
@@ -30,14 +97,39 @@ export default class Core {
 	 * @param {string[]} [role] More roles
 	 * @param {string[]} [upRole] List roles is can control this Role
 	 */
-	_createRole(id, name, rules, roles, upRole) {
-		this._roles.push({
+	_createRole(id, name, rules, roles, upRole, connector = true) {
+		const r = {
 			id,
 			roles,
 			name,
 			rules,
 			upRole,
-		})
+		}
+		this._deleteRole(id, connector)
+		this._roles.push(r)
+		if (connector) this._addRoleConnector(r)
+	}
+
+	/**
+	 *
+	 * @private
+	 * @param {string} idUser Id for search in roles
+	 * @returns {Role}
+	 * @throws {string} "User not find"
+	 */
+	_getRole(idRole) {
+		const r = this._roles.find((f) => f.id === idRole)
+		if (r) return r
+		throw "Role not find"
+	}
+
+	/**
+	 * @private
+	 * @param {string} idRole Id for search in roles
+	 */
+	_deleteRole(idRole, connector = true) {
+		this._roles = this._roles.filter((f) => f.id != idRole)
+		if (connector) this._removeRoleConnector(idRole)
 	}
 
 	/**
@@ -47,13 +139,37 @@ export default class Core {
 	 * @param {Rule[]} rules More rules
 	 * @param {string[]} [upRole] List roles is can control this user
 	 */
-	_createUser(id, roles, rules, upRole) {
-		this._users.push({
+	_createUser(id, roles, rules, upRole, connector = true) {
+		const u = {
 			id,
 			roles,
 			rules,
 			upRole,
-		})
+		}
+		this._deleteUser(id, connector)
+		this._users.push(u)
+		if (connector) this._addUserConnector(u)
+	}
+
+	/**
+	 * @private
+	 * @param {string} idUser Id for search in users
+	 * @returns {User}
+	 * @throws {string} "User not find"
+	 */
+	_getUser(idUser) {
+		const u = this._users.find((f) => f.id === idUser)
+		if (u) return u
+		throw "User not find"
+	}
+
+	/**
+	 * @private
+	 * @param {string} idUser Id for search in users
+	 */
+	_deleteUser(idUser, connector = true) {
+		this._users = this._users.filter((f) => f.id != idUser)
+		if (connector) this._removeUserConnector(idUser)
 	}
 
 	/**
@@ -148,31 +264,6 @@ export default class Core {
 	}
 
 	/**
-	 * @private
-	 * @param {string} idUser Id for search in users
-	 * @returns {User}
-	 * @throws {string} "User not find"
-	 */
-	_getUser(idUser) {
-		const u = this._users.find((f) => f.id === idUser)
-		if (u) return u
-		throw "User not find"
-	}
-
-	/**
-	 *
-	 * @private
-	 * @param {string} idUser Id for search in users
-	 * @returns {User}
-	 * @throws {string} "User not find"
-	 */
-	_getRole(idRole) {
-		const r = this._roles.find((f) => f.id === idRole)
-		if (r) return r
-		throw "Role not find"
-	}
-
-	/**
 	 *
 	 * @private
 	 * @param {string} string
@@ -205,6 +296,83 @@ export default class Core {
 				.map((e) => e[1])
 				.join(".")
 		)
+	}
+
+	/** public */
+
+	/**
+	 *
+	 * @param {string} id
+	 * @param {object} data
+	 * @param {(string|Rule)[]} [data.rules]
+	 * @param {string[]} [data.roles]
+	 * @param {string[]} [data.upRole]
+	 */
+	addUser(id, data) {
+		const {rules, roles, upRole} = data
+		this._createUser(id, roles, rules?.map((e) => (typeof e == "string" ? this._string2Rule(e) : e)) || [], upRole)
+	}
+
+	/**
+	 *
+	 * @param {string} idUser
+	 * @returns {User}
+	 */
+	getUser(idUser) {
+		try {
+			const user = this._getUser(idUser)
+
+			return {
+				...user,
+				rules: user?.rules?.map((e) => this._Rule2string(e)) || [],
+			}
+		} catch (error) {}
+	}
+
+	/**
+	 *
+	 * @param {string} idUser
+	 */
+	deleteUser(idUser) {
+		this._deleteUser(idUser)
+	}
+
+	/**
+	 *
+	 * @param {string} id
+	 * @param {object} data
+	 * @param {string} [data.name]
+	 * @param {(string|Rule)[]} [data.rules]
+	 * @param {string[]} [data.roles]
+	 * @param {string[]} [data.upRole]
+	 */
+	addRole(id, data) {
+		const {name, rules, roles, upRole} = data
+		this._createRole(id, name, rules?.map((e) => (typeof e == "string" ? this._string2Rule(e) : e)) || [], roles, upRole)
+	}
+
+	/**
+	 *
+	 * @param {string} idRole
+	 * @returns {Role}
+	 */
+	getRole(idRole) {
+		try {
+			const role = this._getRole(idRole)
+
+			return {
+				...role,
+				rules: role?.rules?.map((e) => this._Rule2string(e)) || [],
+			}
+		} catch (error) {}
+	}
+
+	/**
+	 *
+	 * @param {string} idRole
+	 */
+	deleteRole(idRole) {
+		this._deleteRole(idRole)
 	}
 
 	/**

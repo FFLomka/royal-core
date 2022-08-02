@@ -5,5 +5,12 @@
 	"main": "index.js",
 	"author": "FLomka",
 	"license": "MIT",
-	"type": "module"
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/FFLomka/royal-core.git"
+	},
+	"dependencies": {
+		"mongodb": "^4.8.1"
+	}
 }
