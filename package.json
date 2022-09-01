@@ -1,6 +1,6 @@
 {
 	"name": "royal-core",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Core for role system",
 	"main": "index.js",
 	"author": "FLomka",
