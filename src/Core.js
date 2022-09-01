@@ -251,9 +251,9 @@ export default class Core {
 	/**
 	 * @private
 	 */
-	_canUser(idUser, rule) {
+	_canUser(idUser, rule, raw) {
 		try {
-			const rules = this._getFullRules4User(idUser)
+			const rules = raw ? idUser : this._getFullRules4User(idUser)
 			if (rules.find((f) => f._v0 === "*")) return true
 			const _vKeys = this._vKeys(rule)
 			if (
