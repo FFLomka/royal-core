@@ -90,6 +90,24 @@ export default class Core {
 	/**
 	 * @private
 	 */
+	async _editRoleConnector(role) {
+		try {
+			this._connector?.editRole(role)
+		} catch (error) {}
+	}
+
+	/**
+	 * @private
+	 */
+	async _editUserConnector(user) {
+		try {
+			this._connector?.editUser(user)
+		} catch (error) {}
+	}
+
+	/**
+	 * @private
+	 */
 	async _removeRoleConnector(idRole) {
 		try {
 			this._connector?.removeRole(idRole)
@@ -121,9 +139,33 @@ export default class Core {
 			rules,
 			upRole,
 		}
-		this._deleteRole(id, connector)
+		this._deleteRole(id, false)
 		this._roles.push(r)
 		if (connector) this._addRoleConnector(r)
+	}
+
+	/**
+	 * @private
+	 * @param {string} id Uniq Id
+	 * @param {string} name Name for role
+	 * @param {Rule[]} rules Base rules
+	 * @param {string[]} [role] More roles
+	 * @param {string[]} [upRole] List roles is can control this Role
+	 */
+	_editRole(id, name, rules, roles, upRole, connector = true) {
+		const r = {
+			...this._getRole(id),
+			...{
+				id,
+				roles,
+				name,
+				rules,
+				upRole,
+			},
+		}
+		this._deleteRole(id, false)
+		this._roles.push(r)
+		if (connector) this._editRoleConnector(r)
 	}
 
 	/**
@@ -162,9 +204,31 @@ export default class Core {
 			rules,
 			upRole,
 		}
-		this._deleteUser(id, connector)
+		this._deleteUser(id, false)
 		this._users.push(u)
 		if (connector) this._addUserConnector(u)
+	}
+
+	/**
+	 * @private
+	 * @param {string} id Uniq Id
+	 * @param {string[]} [role] Base roles
+	 * @param {Rule[]} rules More rules
+	 * @param {string[]} [upRole] List roles is can control this user
+	 */
+	_editUser(id, roles, rules, upRole, connector = true) {
+		const u = {
+			...this._getUser(id),
+			...{
+				id,
+				roles,
+				rules,
+				upRole,
+			},
+		}
+		this._deleteUser(id, false)
+		this._users.push(u)
+		if (connector) this._editUserConnector(u)
 	}
 
 	/**
@@ -331,6 +395,19 @@ export default class Core {
 
 	/**
 	 *
+	 * @param {string} id
+	 * @param {object} data
+	 * @param {(string|Rule)[]} [data.rules]
+	 * @param {string[]} [data.roles]
+	 * @param {string[]} [data.upRole]
+	 */
+	editUser(id, data) {
+		const {rules, roles, upRole} = data
+		this._editUser(id, roles, rules?.map((e) => (typeof e == "string" ? this._string2Rule(e) : e)) || [], upRole)
+	}
+
+	/**
+	 *
 	 * @param {string} idUser
 	 * @returns {User}
 	 */
@@ -365,6 +442,20 @@ export default class Core {
 	addRole(id, data) {
 		const {name, rules, roles, upRole} = data
 		this._createRole(id, name, rules?.map((e) => (typeof e == "string" ? this._string2Rule(e) : e)) || [], roles, upRole)
+	}
+
+	/**
+	 *
+	 * @param {string} id
+	 * @param {object} data
+	 * @param {string} [data.name]
+	 * @param {(string|Rule)[]} [data.rules]
+	 * @param {string[]} [data.roles]
+	 * @param {string[]} [data.upRole]
+	 */
+	editRole(id, data) {
+		const {name, rules, roles, upRole} = data
+		this._editRole(id, name, rules?.map((e) => (typeof e == "string" ? this._string2Rule(e) : e)) || [], roles, upRole)
 	}
 
 	/**

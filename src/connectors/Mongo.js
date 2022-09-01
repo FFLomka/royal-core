@@ -35,6 +35,14 @@ export default class MongoConnector {
 		await (await this._getColl()).deleteMany({id: user.id, type: "u"})
 		await (await this._getColl()).insertOne({...user, createdAt: new Date(), type: "u"})
 	}
+	async editRole(role) {
+		await (await this._getColl()).deleteMany({id: role.id, type: "r"})
+		await (await this._getColl()).insertOne({...role, createdAt: new Date(), type: "r"})
+	}
+	async editRole(user) {
+		await (await this._getColl()).deleteMany({id: user.id, type: "u"})
+		await (await this._getColl()).insertOne({...user, createdAt: new Date(), type: "u"})
+	}
 	async removeRole(idRole) {
 		await (await this._getColl()).deleteMany({id: idRole, type: "r"})
 	}
