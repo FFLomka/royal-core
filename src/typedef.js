@@ -14,18 +14,18 @@
  */
 
 /**
- * @typedef {Object} User
+ * @typedef {Object} Guideline
  * @property {string} id
- * @property {string[]} [roles]
+ * @property {string[]} [guidelines]
+ * @property {any} [payload]
  * @property {(string|Rule)[]} [rules]
- * @property {(string)[]} [upRole]
+ * @property {(string)[]} [upGuideline]
  */
 
 /**
- * @typedef {Object} Role
- * @property {string} id
- * @property {string} [name]
- * @property {string[]} [roles]
+ * @typedef {Object} GuidelineWithoutId
+ * @property {string[]} [guidelines]
+ * @property {any} [payload]
  * @property {(string|Rule)[]} [rules]
- * @property {(string)[]} [upRole]
+ * @property {(string)[]} [upGuideline]
  */
