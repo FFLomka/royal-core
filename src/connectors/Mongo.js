@@ -70,7 +70,9 @@ export default class MongoConnector {
 			{id},
 			{
 				$pull: {rules: {$in: removeRules}, guidelines: {$in: removeGuidelines}, upGuideline: {$in: removeUpGuidelines}},
-			}
+				$setOnInsert: {id},
+			},
+			{upsert: true}
 		)
 
 		await coll.updateOne(
@@ -78,7 +80,9 @@ export default class MongoConnector {
 			{
 				$push: {rules: {$each: addRules.map((e) => Utils.string2Rule(e))}, guidelines: {$each: addGuidelines}, upGuideline: {$each: addUpGuidelines}},
 				...(payload ? {$set: {payload}} : {}),
-			}
+				$setOnInsert: {id},
+			},
+			{upsert: true}
 		)
 	}
 }
