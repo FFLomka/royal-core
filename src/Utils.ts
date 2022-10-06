@@ -1,13 +1,7 @@
-import("./typedef.js")
+import type {IRule} from "../royalCore"
 
 export default class RoyalUtils {
-	/**
-	 *
-	 * @param {string} idUser Id user
-	 * @param {string|Rule} rule
-	 * @returns {boolean}
-	 */
-	static canRules(rules, rule) {
+	static canRules(rules: IRule[], rule: string | IRule): boolean {
 		if (typeof rule == "string") {
 			rule = this.string2Rule(rule)
 		}
@@ -15,39 +9,25 @@ export default class RoyalUtils {
 		return this._canRules(rules, rule)
 	}
 
-	/**
-	 *
-	 * @param {Rule} rule
-	 * @returns {string[]}
-	 */
-	static vKeys(rule) {
+	static vKeys(rule: IRule): string[] {
 		return Object.keys(rule).filter((f) => f.startsWith("_v"))
 	}
 
-	/**
-	 *
-	 * @param {string} string
-	 * @returns {Rule}
-	 */
-	static string2Rule(string) {
+	static string2Rule(string: string): IRule {
 		const exception = string.startsWith("-")
 		return {
+			_v0: "",
 			...Object.fromEntries(
 				string
 					.slice(+exception)
 					.split(".")
-					.map((e, i) => ["_v" + i, e])
+					.map((e, i) => ["_v" + i, e]),
 			),
 			exception,
 		}
 	}
 
-	/**
-	 *
-	 * @param {Rule} rule
-	 * @returns {string}
-	 */
-	static Rule2string(rule) {
+	static Rule2string(rule: IRule): string {
 		return (
 			(rule.exception ? "-" : "") +
 			Object.entries(rule)
@@ -57,20 +37,15 @@ export default class RoyalUtils {
 		)
 	}
 
-	/**
-	 *
-	 * @param {Rule[]} rules
-	 * @returns {Rule[]}
-	 */
-	static rulesCompact(rules) {
+	static rulesCompact(rules: IRule[]): IRule[] {
 		let result = [...rules]
 		const d = result.map((e) => JSON.stringify(e))
 
-		result = result.map((e, i) => (d.indexOf(JSON.stringify(e)) == i ? e : false)).filter((f) => !!f)
+		result = result.filter((f, i) => d.indexOf(JSON.stringify(f)) == i)
 		result = result.map((e) => {
 			const _vKeys = [...this.vKeys(e)]
 			const _vKey = [..._vKeys].pop()
-			if (e[_vKey] != "*") e["_v" + _vKeys.length] = "*"
+			if (_vKey && e[_vKey] !== "*") e["_v" + _vKeys.length] = "*"
 			return e
 		})
 
@@ -83,21 +58,14 @@ export default class RoyalUtils {
 				const _vKeys = this.vKeys(e)
 				result = result.filter(
 					(f) =>
-						_vKeys.map((_v, i, a) => (i == a.length - 1 ? f[_v] != "*" : f[_v] == e[_v])).filter((f) => !!f).length != _vKeys.length || f.exception
+						_vKeys.map((_v, i, a) => (i == a.length - 1 ? f[_v] != "*" : f[_v] == e[_v])).filter((f) => !!f).length != _vKeys.length || f.exception,
 				)
 			})
 
 		return result
 	}
 
-	/**
-	 *
-	 * @private
-	 * @param {Rule[]} rules
-	 * @param {Rule} rule
-	 * @returns
-	 */
-	static _canRules(rules, rule) {
+	private static _canRules(rules: IRule[], rule: IRule): boolean {
 		try {
 			if (rules.find((f) => f._v0 === "*")) return true
 			const _vKeys = this.vKeys(rule)
@@ -107,7 +75,7 @@ export default class RoyalUtils {
 					.map(
 						(e) =>
 							_vKeys.map((_v) => e[_v] == "*" || e[_v] == undefined || rule[_v] == e[_v]).filter((f) => !!f).length == _vKeys.length &&
-							_vKeys.length >= this.vKeys(e).length - 1
+							_vKeys.length >= this.vKeys(e).length - 1,
 					)
 					.filter((f) => !!f).length > 0
 			)

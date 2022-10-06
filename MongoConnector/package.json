@@ -1,0 +1,22 @@
+{
+	"name": "mongo4royal",
+	"version": "1.0.0",
+	"description": "Mongo connector for royal-core",
+	"author": "FLomka",
+	"license": "MIT",
+	"type": "module",
+	"main": "index.js",
+	"engines": {
+		"node": ">=10"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/FFLomka/royal-core.git"
+	},
+	"dependencies": {
+		"mongodb": "^4.10.0"
+	},
+	"devDependencies": {
+		"prettier": "^2.0.4"
+	}
+}

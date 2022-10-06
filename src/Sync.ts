@@ -1,7 +1,10 @@
-import {Utils} from "../../index.js"
+import type {IConnector, IConnectorUpdate, IGuideline, IRule} from "../royalCore"
+import Utils from "./Utils"
 
-export default class SyncConnector {
-	constructor(data = []) {
+export default class SyncConnector implements IConnector {
+	private data: IGuideline[]
+
+	constructor(data: IGuideline[] = []) {
 		this.data = data
 	}
 
@@ -9,11 +12,10 @@ export default class SyncConnector {
 		return this.data
 	}
 
-	get(id) {
+	get(id: string) {
 		return this.data.find((f) => f.id == id)
 	}
-
-	add(id, guidelines, payload, rules, upGuideline) {
+	add(id: string, guidelines: string[], payload: any, rules: IRule[], upGuideline: string[]): void {
 		if (this.data.find((f) => f.id == id)) throw new Error("Guideline is exists")
 
 		const doc = {
@@ -25,20 +27,20 @@ export default class SyncConnector {
 		}
 
 		this.data.push(doc)
-
-		return doc
 	}
 
-	remove(id) {
+	remove(id: string) {
 		const i = this.data.findIndex((f) => f.id == id)
 		if (i == -1) throw new Error("Guideline is not exists")
 		return this.data.splice(i, 1)[0]
 	}
 
-	update(id, controller) {
+	update(id: string, controller: IConnectorUpdate) {
 		const {addRules = [], removeRules = [], addGuidelines = [], removeGuidelines = [], addUpGuidelines = [], removeUpGuidelines = [], payload} = controller
 
 		const guideline = this.data.find((f) => f.id == id)
+
+		if (!guideline) return
 
 		removeRules.forEach((rule) => {
 			const i = (guideline.rules || []).findIndex((f) => Utils.Rule2string(f) == rule)

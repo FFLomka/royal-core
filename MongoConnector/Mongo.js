@@ -1,8 +1,9 @@
-import {Collection, MongoClient} from "mongodb"
-import {Utils} from "../../index.js"
+import Utils from "../Utils"
+import {MongoClient, Collection} from "mongodb"
 
 export default class MongoConnector {
-	constructor(string, dbName, collection = "royal") {
+	constructor(string, dbName)
+	constructor(string, dbName, collection) {
 		this._client = new MongoClient(string)
 		this._connection = this._client.connect()
 		this._dbName = dbName
@@ -16,15 +17,11 @@ export default class MongoConnector {
 				{
 					unique: true,
 					name: "Guidelines Id",
-				}
+				},
 			)
 		})
 	}
 
-	/**
-	 * @private
-	 * @returns {Promise<Collection>}
-	 */
 	async _getColl() {
 		await this._connection
 		return this._client.db(this._dbName).collection(this._collection)
@@ -49,8 +46,6 @@ export default class MongoConnector {
 			}
 
 			await (await this._getColl()).insertOne(doc)
-
-			return doc
 		} catch (error) {
 			throw new Error("Guideline is exists")
 		}
@@ -72,7 +67,7 @@ export default class MongoConnector {
 				$pull: {rules: {$in: removeRules}, guidelines: {$in: removeGuidelines}, upGuideline: {$in: removeUpGuidelines}},
 				$setOnInsert: {id},
 			},
-			{upsert: true}
+			{upsert: true},
 		)
 
 		await coll.updateOne(
@@ -82,7 +77,7 @@ export default class MongoConnector {
 				...(payload ? {$set: {payload}} : {}),
 				$setOnInsert: {id},
 			},
-			{upsert: true}
+			{upsert: true},
 		)
 	}
 }
