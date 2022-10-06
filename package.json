@@ -1,6 +1,6 @@
 {
 	"name": "royal-core",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"description": "Core for role system",
 	"author": "FLomka",
 	"license": "MIT",
@@ -27,7 +27,6 @@
 	},
 	"files": [
 		"dist",
-		"MongoConnector.js",
-		"royal-core.d.ts"
+		"royalCore.d.ts"
 	]
 }
