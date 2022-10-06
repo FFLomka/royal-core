@@ -1,11 +1,12 @@
 {
 	"name": "mongo4royal",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"description": "Mongo connector for royal-core",
 	"author": "FLomka",
 	"license": "MIT",
 	"type": "module",
 	"main": "index.js",
+	"types": "MongoConnector.d.ts",
 	"engines": {
 		"node": ">=10"
 	},
@@ -18,5 +19,10 @@
 	},
 	"devDependencies": {
 		"prettier": "^2.0.4"
-	}
+	},
+	"files": [
+		"index.js",
+		"Mongo.js",
+		"MongoConnector.d.ts"
+	]
 }
