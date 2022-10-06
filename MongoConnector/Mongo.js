@@ -1,8 +1,6 @@
-import Utils from "../Utils"
-import {MongoClient, Collection} from "mongodb"
+import {MongoClient} from "mongodb"
 
 export default class MongoConnector {
-	constructor(string, dbName)
 	constructor(string, dbName, collection) {
 		this._client = new MongoClient(string)
 		this._connection = this._client.connect()
@@ -73,11 +71,25 @@ export default class MongoConnector {
 		await coll.updateOne(
 			{id},
 			{
-				$push: {rules: {$each: addRules.map((e) => Utils.string2Rule(e))}, guidelines: {$each: addGuidelines}, upGuideline: {$each: addUpGuidelines}},
+				$push: {rules: {$each: addRules.map((e) => string2Rule(e))}, guidelines: {$each: addGuidelines}, upGuideline: {$each: addUpGuidelines}},
 				...(payload ? {$set: {payload}} : {}),
 				$setOnInsert: {id},
 			},
 			{upsert: true},
 		)
+	}
+}
+
+function string2Rule(string) {
+	const exception = string.startsWith("-")
+	return {
+		_v0: "",
+		...Object.fromEntries(
+			string
+				.slice(+exception)
+				.split(".")
+				.map((e, i) => ["_v" + i, e]),
+		),
+		exception,
 	}
 }

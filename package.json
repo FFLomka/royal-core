@@ -4,7 +4,7 @@
 	"description": "Core for role system",
 	"author": "FLomka",
 	"license": "MIT",
-	"type": "commonjs",
+	"type": "module",
 	"main": "dist/index.js",
 	"module": "dist/index.modern.js",
 	"source": "src/index.ts",
