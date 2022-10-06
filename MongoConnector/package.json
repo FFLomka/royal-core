@@ -1,6 +1,6 @@
 {
 	"name": "mongo4royal",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Mongo connector for royal-core",
 	"author": "FLomka",
 	"license": "MIT",
